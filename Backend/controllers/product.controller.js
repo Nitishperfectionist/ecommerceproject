@@ -2,7 +2,7 @@ const Product=require("../models/product.model")
 
 
 
-//create product
+//create product//admin
 exports.createProduct=async(req,res,next)=>{
   const product=await Product.create(req.body);
   res.status(201).json({
@@ -11,7 +11,12 @@ exports.createProduct=async(req,res,next)=>{
   })
 }
 
-
-exports.getAllProducts=(req,res)=>{
-  res.status(200).json({message:"routes are correctly assign"})
+//get request
+exports.getAllProducts=async(req,res)=>{
+  const product=await Product.find();
+  res.status(200)
+  .json({
+    sucess:true,
+    product
+  })
 }
