@@ -20,3 +20,50 @@ exports.getAllProducts=async(req,res)=>{
     product
   })
 }
+
+//update product=admin
+
+exports.updateProducts=async(req,res,next)=>{
+  let product=await Product.findById(req.params.id);
+
+  if(!product){
+    res.status(500).json({
+      success:false,
+      message:"product not found"
+    })
+  }
+  product=await Product.findByIdAndUpdate(req.params.id,req.body,{
+    new:true,
+    runValidatotrs:true,
+    useFindAndModify:false,
+  });
+  res.status(200).json({
+    success:true,
+    product,
+  })
+}
+
+//delete product
+exports.deleteProducts=async(req,res,next)=>{
+  let product=await Product.findById(req.params.id);
+
+  if(!product){
+    res.status(500).json({
+      success:false,
+      message:"product not found",
+    })
+  }
+
+  //you  can also use instead of this 
+  //await product.remove();
+
+  product=await Product.findByIdAndDelete(req.params.id,req.body,{
+    new:true,
+    runValidatotrs:true,
+    useFindAndModify:false,
+  })
+  res.status(200).json({
+    success:true,
+    product:"product deleted successfully"
+  })
+}
