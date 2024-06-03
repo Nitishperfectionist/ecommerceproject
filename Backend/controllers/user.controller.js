@@ -133,3 +133,64 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler(error.message, 500));
     }
 });
+
+
+
+//get user details
+
+exports.getUserDetails=catchAsyncError(async(req,res,next)=>{
+    const user=await User.findById(req.user.id);
+
+    res.status(200).json({
+      success:true,
+      user,
+    })
+})
+
+
+//update user profile
+
+exports.updateUserprofile=catchAsyncError(async(req,res,next)=>{
+
+    const newUserdata={
+        name:req.body.name,
+        email:req.body.email,
+    }
+
+    //i will add cloudinary after some times
+
+    const user=await User.findByIdAndUpdate(req.user.id,newUserdata,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false,
+    });
+    res.status(200).json({
+        success:true,
+        user,
+      })
+})
+
+
+// to get all users who make id means it is checked by =>admin
+exports.togetAllusers=catchAsyncError(async(req,res,next)=>{
+  const users=await User.find();
+
+  res.status(200).json({
+    success:true,
+    users,
+  })
+})
+
+// get single user(admin)
+exports.togetSingleuser=catchAsyncError(async(req,res,next)=>{
+    const user=await User.findById(req.params.id);
+
+    if(!user){
+        return next(new ErrorHandler(`user doenot exist with id:${req.params.id}`))
+    }
+  
+    res.status(200).json({
+      success:true,
+      user,
+    })
+  })

@@ -5,9 +5,12 @@ const {isAuthenticatedUser,authorizedRole}=require("../middleware/auth");
 const router=express.Router();
 
 router.route("/product").get(getAllProducts);
-router.route("/product/new").post(isAuthenticatedUser,authorizedRole("admin"),createProduct);
-router.route("/product/:id").put(isAuthenticatedUser,authorizedRole("admin"),updateProducts);
-router.route("/product/:id").delete(isAuthenticatedUser,authorizedRole("admin"),deleteProducts);
+
+router.route("/admin/product/new").post(isAuthenticatedUser,authorizedRole("admin"),createProduct);
+router.route("/admin/product/:id").put(isAuthenticatedUser,authorizedRole("admin"),updateProducts);
+router.route("/admin/product/:id").delete(isAuthenticatedUser,authorizedRole("admin"),deleteProducts);
+
+
 router.route("/product/:id").get(getSingleProductDetails);
 
 module.exports = router;

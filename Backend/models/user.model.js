@@ -42,7 +42,12 @@ const userSchema=new mongoose.Schema({
     resetPasswordToken:String,
     resetPasswordExpired:Date,
    
+},{
+    timestamps:true,
 })
+
+
+
 //password modification//encrypted password 
 userSchema.pre("save",async function(next){
     if(!this.isModified("password")){
