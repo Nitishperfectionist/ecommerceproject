@@ -194,3 +194,44 @@ exports.togetSingleuser=catchAsyncError(async(req,res,next)=>{
       user,
     })
   })
+
+
+  //update user role only done by admin
+  exports.updateUserRole=catchAsyncError(async(req,res,next)=>{
+
+    const newUserdata={
+        name:req.body.name,
+        email:req.body.email,
+        role:req.body.role,
+    }
+
+    const user=await User.findByIdAndUpdate(req.params.id,newUserdata,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false,
+    });
+    res.status(200).json({
+        success:true,
+        user,
+      })
+})
+
+//delete user done by admin
+
+exports.deleteUser=catchAsyncError(async(req,res,next)=>{
+
+    
+    const user=await User.findById(req.params.id);
+
+    if(!user){
+        return next(new ErrorHandler(`user doenot exist with id:${req.params.id}`))
+    }
+       
+    
+    await user.deleteOne();
+
+    res.status(200).json({
+        success:true,
+        message:"user deleted successfully",
+      })
+})

@@ -112,3 +112,81 @@ exports.deleteProducts=catchAsyncError(async(req,res,next)=>{
     product:"product deleted successfully"
   })
 });
+
+
+//create and update new review
+
+exports.createProductReview = catchAsyncError(async (req, res, next) => {
+  const { rating, comment, productid } = req.body;
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+
+  const product = await Product.findById(productid);
+
+  if (!product) {
+    return next(new ErrorHandler(`Product not found with id: ${productid}`, 404));
+  }
+
+  const isReview = product.reviews.find((rev) => rev.user.toString() === req.user._id.toString());
+
+  if (isReview) {
+    product.reviews.forEach((rev) => {
+      if (rev.user.toString() === req.user._id.toString()) {
+        rev.rating = rating;
+        rev.comment = comment;
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numberofreviews = product.reviews.length;
+  }
+
+  let totalRating = 0;
+  product.reviews.forEach((rev) => {
+    totalRating += rev.rating;
+  });
+  product.ratings = totalRating / product.reviews.length;
+
+  await product.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+//to get all reviews of a product
+
+exports.togetAllReviews=catchAsyncError(async(req,res,next)=>{
+  const product=await Product.findById(req.query.id);
+  if (!product) {
+    return next(new ErrorHandler(`Product not found`, 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    reviews:product.reviews,
+  });
+})
+
+//delete review
+exports.deleteReview=catchAsyncError(async(req,res,next)=>{
+  const product=await Product.findById(req.query.productid);
+  if (!product) {
+    return next(new ErrorHandler(`Product not found`, 404));
+  }
+  const review=product.reviews.filter(rev=>rev._id.toString()!==req.query.id.toString());
+
+  let totalRating = 0;
+  review.forEach((rev) => {
+    totalRating += rev.rating;
+  });
+  product.ratings = totalRating / product.review.length;
+
+
+  res.status(200).json({
+    success: true,
+  });
+})
