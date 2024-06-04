@@ -74,33 +74,49 @@ exports.getAllOrders=catchAsyncError(async(req,res,next)=>{
 })
 
 //update order sattus--admin
-exports.updateOrderStatus=catchAsyncError(async(req,res,next)=>{
-    const order=await Order.findById(req.params.id);
+// update order status--admin
+exports.updateOrderStatus = catchAsyncError(async (req, res, next) => {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+        return next(new ErrorHandler("Order not found with this ID", 404));
+    }
 
-  if(order.orderStatus === "delivered"){
-   return next(new ErrorHandler("you have already delivered this order",404))
-   
-  }
-  order.orderItems.forEach(async(order)=>{
-     await updateStocks(order.product,order.quantity);
-  })
-  order.orderStatus=req.body.status;
-  if(req.body.status ==="delivered"){
-    order.deliveredAt=Date.now();
-  }
-  await order.save({validateBeforeSave: false});
-    
-    res.status(201).json({
-        success:true,
+    if (order.orderStatus === "delivered") {
+        return next(new ErrorHandler("You have already delivered this order", 400));
+    }
+
+    order.orderItems.forEach(async (item) => {
+        await updateStocks(item.product, item.quantity);
+    });
+
+    order.orderStatus = req.body.status;
+
+    if (req.body.status === "delivered") {
+        order.deliveredAt = Date.now();
+    }
+
+    await order.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+        success: true,
         order,
-    })
-})
-async function updateStocks(id,quantity){
-    const product=await Product.findById(id);
+    });
+});
 
-    product.stock-= quantity;
-    await product.save({validateBeforeSave: false});
-    
+async function updateStocks(id, quantity) {
+    const product = await Product.findById(id);
+
+    if (!product) {
+        throw new ErrorHandler("Product not found", 404);
+    }
+
+    // Ensure stock does not go negative
+    if (product.stock < quantity) {
+        throw new ErrorHandler(`Insufficient stock for product ${product.name}`, 400);
+    }
+
+    product.stock = product.stock - quantity;
+    await product.save({ validateBeforeSave: false });
 }
 
 //delete order
